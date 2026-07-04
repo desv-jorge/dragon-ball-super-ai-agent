@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: ajudante-prof-rodrigo
+    name: dragon-ball-super-ai-agent
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
