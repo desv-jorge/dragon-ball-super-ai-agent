@@ -193,7 +193,7 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
         msg.attach(text_part)
         msg.attach(html_part)
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
             server.sendmail(GMAIL_USER, destinatario, msg.as_string())
 
