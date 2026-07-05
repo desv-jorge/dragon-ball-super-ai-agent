@@ -191,15 +191,26 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
         html_part = MIMEText(html_content, "html", "utf-8")
 
         msg.attach(text_part)
-        msg.attach(html_part)
+        # Enviar requisição para o webhook do n8n
+        webhook_url = "https://jorgete.app.n8n.cloud/webhook/send-email"
+        
+        payload = {
+            "destinatario": destinatario,
+            "assunto": f"🐉 Dragon Ball Super — Informações de {nome_personagem}",
+            "conteudo_texto": conteudo,
+            "conteudo_html": html_content
+        }
 
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=10) as server:
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-            server.sendmail(GMAIL_USER, destinatario, msg.as_string())
+        # Envia a requisição POST (sem bloquear a thread, por ser rápido, ou podemos usar requests)
+        # O ideal seria usar httpx.AsyncClient, mas a função atual é síncrona.
+        import httpx
+        with httpx.Client(timeout=10.0) as client:
+            response = client.post(webhook_url, json=payload)
+            response.raise_for_status()
 
-        return json.dumps({"status": "success", "message": "E-mail enviado com sucesso."})
+        return json.dumps({"status": "success", "message": "E-mail encaminhado para o n8n com sucesso."})
     except Exception as e:
-        return json.dumps({"status": "error", "message": f"Erro ao enviar e-mail: {str(e)}"})
+        return json.dumps({"status": "error", "message": f"Erro ao encaminhar e-mail para o n8n: {str(e)}"})
 
 
 # ── Dispatcher — mapeia nome da tool → função ──────────────────────
