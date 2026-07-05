@@ -155,22 +155,46 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
     try:
         # Simple markdown to HTML parsing for the email
         html_body = conteudo
-        # Images: ![alt](url) -> <img src="url" alt="alt" style="...">
-        html_body = re.sub(r'!\[([^\]]*)\]\(([^)]+)\)', r'<br><img src="\2" alt="\1" style="max-width:100%; max-height:300px; border-radius:12px; margin-top:10px;"><br>', html_body)
+        # Images (Markdown): ![alt](url) -> <img src="url" alt="alt" style="...">
+        html_body = re.sub(
+            r'!\[([^\]]*)\]\(([^)]+)\)', 
+            r'<div style="text-align: center; margin: 20px 0;"><img src="\2" alt="\1" style="max-width: 100%; max-height: 350px; border-radius: 12px; border: 2px solid #e94560; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);"></div>', 
+            html_body
+        )
+        # Images (Plain text): Imagem: https://... -> <img>
+        html_body = re.sub(
+            r'(?:Imagem|Image):\s*(https?://[^\s]+)', 
+            r'<div style="text-align: center; margin: 20px 0;"><img src="\1" alt="Personagem" style="max-width: 100%; max-height: 350px; border-radius: 12px; border: 2px solid #e94560; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);"></div>', 
+            html_body
+        )
         # Bold: **text** -> <strong>text</strong>
         html_body = re.sub(r'\*\*([^*]+)\*\*', r'<strong>\1</strong>', html_body)
+        
+        # Atributos: "Nome: Valor" -> "<strong color>Nome:</strong> Valor"
+        html_body = re.sub(
+            r'^([A-ZÇÃÕÁÉÍÓÚa-zçãõáéíóú\s]+):', 
+            r'<strong style="color: #e94560;">\1:</strong>', 
+            html_body, 
+            flags=re.MULTILINE
+        )
 
         # Corpo em HTML para melhor formatação
         html_content = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; padding: 20px; background: #1a1a2e; color: #eee;">
-            <div style="max-width: 600px; margin: 0 auto; background: #16213e; border-radius: 12px; padding: 24px; border: 1px solid #0f3460;">
-                <h2 style="color: #e94560; margin-top: 0;">🐉 {nome_personagem}</h2>
-                <div style="white-space: pre-wrap; line-height: 1.7;">{html_body}</div>
-                <p style="font-size: 12px; color: #888;">
-                    Enviado automaticamente pelo <strong>Ajudante do desenvolvedor Nathanael Jorge</strong> — 
-                    Agente de IA especialista em Dragon Ball Super.
-                </p>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 30px 15px; background-color: #0f172a; color: #e2e8f0; margin: 0;">
+            <div style="max-width: 600px; margin: 0 auto; background: linear-gradient(145deg, #1e293b, #0f172a); border-radius: 16px; padding: 32px; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <div style="text-align: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 25px;">
+                    <h2 style="color: #f43f5e; margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 1px;">🐉 {nome_personagem}</h2>
+                </div>
+                
+                <div style="white-space: pre-wrap; line-height: 1.8; font-size: 16px; color: #cbd5e1;">{html_body}</div>
+                
+                <div style="margin-top: 35px; padding-top: 20px; border-top: 1px dashed #475569; text-align: center;">
+                    <p style="font-size: 13px; color: #94a3b8; margin: 0; line-height: 1.5;">
+                        Enviado automaticamente pelo <strong style="color: #cbd5e1;">Ajudante do desenvolvedor Nathanael Jorge</strong><br>
+                        🤖 <span style="font-style: italic;">Seu agente de IA especialista em Dragon Ball Super</span>
+                    </p>
+                </div>
             </div>
         </body>
         </html>
