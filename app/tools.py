@@ -2,19 +2,14 @@
 
 import json
 import logging
-import smtplib
 import traceback
 import re
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 import httpx
 import gspread
 from google.oauth2.service_account import Credentials
 
 from app.config import (
-    GMAIL_USER,
-    GMAIL_APP_PASSWORD,
     SPREADSHEET_NAME,
     get_google_credentials,
 )
@@ -155,16 +150,8 @@ def salvar_planilha(
 
 
 def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
-    """Envia e-mail via Gmail SMTP com as informações do personagem."""
+    """Envia e-mail via n8n Webhook com as informações do personagem."""
     try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"🐉 Dragon Ball Super — Informações de {nome_personagem}"
-        msg["From"] = GMAIL_USER
-        msg["To"] = destinatario
-
-        # Corpo em texto simples
-        text_part = MIMEText(conteudo, "plain", "utf-8")
-
         # Simple markdown to HTML parsing for the email
         html_body = conteudo
         # Images: ![alt](url) -> <img src="url" alt="alt" style="...">
@@ -188,9 +175,6 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
         </body>
         </html>
         """
-        html_part = MIMEText(html_content, "html", "utf-8")
-
-        msg.attach(text_part)
         # Enviar requisição para o webhook do n8n
         webhook_url = "https://jorgete.app.n8n.cloud/webhook/send-email"
         
@@ -201,9 +185,7 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
             "conteudo_html": html_content
         }
 
-        # Envia a requisição POST (sem bloquear a thread, por ser rápido, ou podemos usar requests)
-        # O ideal seria usar httpx.AsyncClient, mas a função atual é síncrona.
-        import httpx
+        # Envia a requisição POST síncrona usando httpx que já está importado no topo
         with httpx.Client(timeout=10.0) as client:
             response = client.post(webhook_url, json=payload)
             response.raise_for_status()
