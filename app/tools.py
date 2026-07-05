@@ -6,6 +6,7 @@ import traceback
 import re
 
 import httpx
+# pyrefly: ignore [missing-import]
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -166,7 +167,6 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
             <div style="max-width: 600px; margin: 0 auto; background: #16213e; border-radius: 12px; padding: 24px; border: 1px solid #0f3460;">
                 <h2 style="color: #e94560; margin-top: 0;">🐉 {nome_personagem}</h2>
                 <div style="white-space: pre-wrap; line-height: 1.7;">{html_body}</div>
-                <hr style="border-color: #0f3460; margin: 20px 0;">
                 <p style="font-size: 12px; color: #888;">
                     Enviado automaticamente pelo <strong>Ajudante do desenvolvedor Nathanael Jorge</strong> — 
                     Agente de IA especialista em Dragon Ball Super.
@@ -177,7 +177,7 @@ def enviar_email(destinatario: str, conteudo: str, nome_personagem: str) -> str:
         """
         # Enviar requisição para o webhook do n8n
         webhook_url = "https://jorgete.app.n8n.cloud/webhook/send-email"
-        
+
         payload = {
             "destinatario": destinatario,
             "assunto": f"🐉 Dragon Ball Super — Informações de {nome_personagem}",
@@ -212,6 +212,7 @@ async def execute_tool(name: str, arguments: dict) -> str:
 
     # buscar_personagem é async, as demais são sync
     if name == "buscar_personagem":
+        # pyrefly: ignore [not-async]
         return await func(**arguments)
     else:
         return func(**arguments)
